@@ -2,7 +2,9 @@ package adventofcode.`2019`.`01`
 
 import java.io.File
 
-/** Solution for [Advent of Code day 1](https://adventofcode.com/2019/day/1).*/
+/**
+ * Solution for [Advent of Code day 1](https://adventofcode.com/2019/day/1).
+ */
 fun main() {
     // Read input file
     val moduleMasses: List<Int> =
@@ -16,7 +18,10 @@ fun main() {
     // Part 2:
     val betterEstimate =
         moduleMasses.map { recursivelyCalculateFuelMass(it) }.sum()
-    println("But if we account for fuel needing fuel, we actually need $betterEstimate")
+    println(
+        "" +
+                "But if we account for fuel needing fuel, " +
+                "then we actually need $betterEstimate")
 }
 
 private fun recursivelyCalculateFuelMass(mass: Int): Int {
