@@ -6,7 +6,7 @@ import java.io.File
 fun main() {
     // Read input file
     val moduleMasses: List<Int> =
-        File("src/adventofcode/2019/01/input_day01.txt")
+        File("src/adventofcode/2019/01/input.txt")
             .readLines()
             .map { it.toInt() }
     // Part 1:
