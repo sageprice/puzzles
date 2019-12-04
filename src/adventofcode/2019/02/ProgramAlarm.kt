@@ -14,35 +14,35 @@ fun main() {
   println(programSpec)
 
   // Part 1
-  val mutSpec: MutableList<Int> = programSpec.toMutableList()
-  mutSpec[1] = 12
-  mutSpec[2] = 2
+  println(evalSpec(programSpec, 12, 2))
+
+  // Part 2
+  val answer = 19690720
+  for (noun in 1..100) {
+    for (verb in 1..100) {
+      if (evalSpec(programSpec, noun, verb) == answer) {
+        println(noun * 100 + verb)
+        return
+      }
+    }
+  }
+}
+
+fun evalSpec(spec: List<Int>, noun: Int, verb: Int): Int {
+  val mutSpec: MutableList<Int> = spec.toMutableList()
+  mutSpec[1] = noun
+  mutSpec[2] = verb
   var programIndex: Int = 0
   while (mutSpec.get(programIndex) != 99) {
-    println("----------------------------------------------------------")
-    println(mutSpec.slice(programIndex until programIndex + 4))
     val first = mutSpec[mutSpec[programIndex + 1]]
     val second = mutSpec[mutSpec[programIndex + 2]]
     val target = mutSpec[programIndex + 3]
     when (mutSpec[programIndex]) {
-      1 -> {
-        println("Adding ${first} and ${second} into location ${target}")
-        mutSpec[target] = first + second
-        println(mutSpec[target])
-        println(mutSpec.slice(0 until target + 1))
-      }
-      2 -> {
-        println("Multiplying ${first} and ${second} into location ${target}")
-        mutSpec[target] = first * second
-        println(mutSpec.get(target))
-        println(mutSpec.slice(0 until target + 1))
-      }
-      else -> {
-        throw Exception("PANIC")
-      }
+      1 -> mutSpec[target] = first + second
+      2 -> mutSpec[target] = first * second
+      else -> return -1
     }
     programIndex += 4
-    println(mutSpec)
   }
-  println(mutSpec.get(0))
+  return mutSpec.get(0)
 }
