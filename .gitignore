@@ -2,3 +2,4 @@
 .idea
 puzzles.iml
 out
+**/*.jar
