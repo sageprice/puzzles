@@ -10,7 +10,7 @@ fun main() {
   val programSpec: List<Int> =
       File("input.txt")
       // File("test_input.txt")
-         .readLines().get(0).split(",").map { it.toInt() }
+         .readLines()[0].split(",").map { it.toInt() }
   println(programSpec)
 
   // Part 1
