@@ -6,6 +6,9 @@ import adventofcode.`2019`.intcode.InputOp
 import adventofcode.`2019`.intcode.Instruction
 import java.io.File
 
+/**
+ * Solution for [Advent of Code day 7](https://adventofcode.com/2019/day/7).
+ */
 fun main() {
     // Read input file
     val intcode: List<Int> =
