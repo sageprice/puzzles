@@ -8,10 +8,10 @@ import java.io.File
  */
 fun main() {
   // Read input file
-  val programSpec: List<Int> =
+  val programSpec: List<Long> =
       File("src/adventofcode/2019/05/input.txt")
       // File("test_input.txt")
-         .readLines()[0].split(",").map { it.toInt() }
+         .readLines()[0].split(",").map { it.toLong() }
 
   // Part 1 -- provide input 1
   // Part 2 -- provide input 5

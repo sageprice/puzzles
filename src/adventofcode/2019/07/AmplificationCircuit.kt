@@ -3,6 +3,7 @@ package adventofcode.`2019`.`07`
 import adventofcode.`2019`.intcode.evalSpec
 import adventofcode.`2019`.intcode.HaltOp
 import adventofcode.`2019`.intcode.InputOp
+import adventofcode.`2019`.intcode.Mode
 import adventofcode.`2019`.intcode.Instruction
 import java.io.File
 
@@ -11,20 +12,20 @@ import java.io.File
  */
 fun main() {
     // Read input file
-    val intcode: List<Int> =
+    val intcode: List<Long> =
         File("src/adventofcode/2019/07/input.txt")
             .readLines()[0]
             .split(",")
-            .map { it.toInt() }
+            .map { it.toLong() }
 
     // Part 1
-    var maxSignal = 0
+    var maxSignal = 0L
     for (input in generateInputPermutations(0..4)) {
-        val amp1 = evalSpec(intcode, listOf(input[0], 0)).first
-        val amp2 = evalSpec(intcode, listOf(input[1], amp1)).first
-        val amp3 = evalSpec(intcode, listOf(input[2], amp2)).first
-        val amp4 = evalSpec(intcode, listOf(input[3], amp3)).first
-        val amp5 = evalSpec(intcode, listOf(input[4], amp4)).first
+        val amp1 = evalSpec(intcode, listOf(input[0].toLong(), 0)).first
+        val amp2 = evalSpec(intcode, listOf(input[1].toLong(), amp1)).first
+        val amp3 = evalSpec(intcode, listOf(input[2].toLong(), amp2)).first
+        val amp4 = evalSpec(intcode, listOf(input[3].toLong(), amp3)).first
+        val amp5 = evalSpec(intcode, listOf(input[4].toLong(), amp4)).first
         if (maxSignal < amp5) {
             maxSignal = amp5
         }
@@ -34,15 +35,15 @@ fun main() {
     // Part 2
     maxSignal = 0
     for (input in generateInputPermutations(5..9)) {
-        var ultimate = 0
-        var exitCode: Instruction = InputOp
+        var ultimate = 0L
+        var exitCode: Instruction = InputOp(Mode.IMMEDIATE)
         val startIndices = mutableListOf(0, 0, 0, 0, 0)
-        val feedbackInputs = mutableListOf<MutableList<Int>>(
-            mutableListOf(input[0], 0),
-            mutableListOf(input[1]),
-            mutableListOf(input[2]),
-            mutableListOf(input[3]),
-            mutableListOf(input[4]))
+        val feedbackInputs = mutableListOf<MutableList<Long>>(
+            mutableListOf(input[0].toLong(), 0),
+            mutableListOf(input[1].toLong()),
+            mutableListOf(input[2].toLong()),
+            mutableListOf(input[3].toLong()),
+            mutableListOf(input[4].toLong()))
         while (exitCode != HaltOp) {
             val amp1 = evalSpec(intcode, feedbackInputs[0], startIndices[0])
             startIndices[0] = amp1.second
