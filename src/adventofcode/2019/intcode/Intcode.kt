@@ -16,10 +16,10 @@ fun evalSpec(program: List<Long>, inputs: List<Long>? = null, startIndex: Int = 
     while (instr != HaltOp) {
         when (instr) {
             is InputOp -> {
-                println("Input instruction: $instr, " +
-                        "programIndex of $programIndex, " +
-                        "relative base offset of $relativeOffset, " +
-                        "base offset of ${prog[programIndex+1]}")
+//                println("Input instruction: $instr, " +
+//                        "programIndex of $programIndex, " +
+//                        "relative base offset of $relativeOffset, " +
+//                        "base offset of ${prog[programIndex+1]}")
                 val input: Long = if (inputs == null) {
                     print("Please provide an integer input: ")
                     readLine()!!.toLong()
@@ -31,14 +31,14 @@ fun evalSpec(program: List<Long>, inputs: List<Long>? = null, startIndex: Int = 
                         return Triple(output, programIndex, instr)
                     }
                 }
+                // Special handling for write bit.
                 val position = prog[programIndex + 1].toInt() + if (instr.outMode == Mode.RELATIVE) relativeOffset else 0
                 prog[position] = input
                 programIndex += 2
             }
             is OutputOp -> {
-                val arg = prog[programIndex + 1]
-                output = getArgument(instr.outMode, prog, programIndex, 1, relativeOffset)//if (instr.outMode == Mode.IMMEDIATE) arg else prog[arg.toInt()]
-                println("$programIndex -- output at index $arg: $output")
+                output = getArgument(instr.outMode, prog, programIndex, 1, relativeOffset)
+//                println("$programIndex -- output at index $arg: $output")
                 programIndex += 2
             }
             is UnaryInstruction -> {
@@ -54,7 +54,8 @@ fun evalSpec(program: List<Long>, inputs: List<Long>? = null, startIndex: Int = 
             is BinaryInstruction -> {
                 val first = getArgument(instr.firstInMode, prog, programIndex, 1, relativeOffset)
                 val second = getArgument(instr.secondInMode, prog, programIndex, 2, relativeOffset)
-                val third = prog[programIndex + 3].toInt()
+                // Special handling for write bit.
+                val third = prog[programIndex + 3].toInt() + if (instr.outMode == Mode.RELATIVE) relativeOffset else 0
                 when (instr.action) {
                     BinaryAction.ADD -> {
                         prog[third] = first + second
