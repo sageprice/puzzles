@@ -1,91 +1,90 @@
-package adventofcode.`2019`.`13`
+package adventofcode.`2019`.`15`
 
 import java.io.File
 
 fun main() {
     // Read input file
     val programSpec: List<Long> =
-            File("src/adventofcode/2019/13/input.txt")
-                    // File("test_input.txt")
-                    .readLines()[0].split(",").map { it.toLong() }
+        File("src/adventofcode/2019/15/input.txt")
+            // File("test_input.txt")
+            .readLines()[0].split(",").map { it.toLong() }
 
     // Part 1
-    val output1 = evalSpec(programSpec).outputs
-    println("Part 1: there are ${output1.chunked(3).count { it[2] == 2L }} block tiles on exit")
+    val searchResult =
+        recursiveSearchForOxygen(programSpec, listOf(Coord(0, 0)), null)!!
+//    searchResult.first.forEach { println(it) }
+    println("Part 1: path to oxygen is length ${searchResult.first.size}")
 
     // Part 2
-    val endlessQuarters = programSpec.toMutableList()
-    endlessQuarters[0] = 2
-    println("Part 2: final score is ${playArcade(endlessQuarters)}")
+    val executionToOxygen = searchResult.second
+    val search = searchFromOxygen(listOf(searchResult.first.last()), executionToOxygen)
+//    println(search)
+    println("Part 2: longest distance from oxygen is length ${search.values.max()}")
 }
 
-private fun playArcade(endlessQuarters: MutableList<Long>): Int {
-    var execution = evalSpec(endlessQuarters, listOf())
-    var score = 0
-    while (execution.exitInstr != HaltOp) {
-        val output = execution.outputs
-
-        val triples = output.map { it.toInt() }.chunked(3)
-        val scoreDisplayPair = triples.partition { it[0] == -1 }
-        val scoreTriples = scoreDisplayPair.first
-        if (scoreTriples.isNotEmpty()) {
-            score = scoreTriples.last()[2]
-//            println("New score: $score")
-        }
-        val tiles: List<List<Int>> = scoreDisplayPair.second
-
-        val xMax = tiles.map { it[0] }.max()!!
-        val yMax = tiles.map { it[1] }.max()!!
-
-        var paddleX = -1
-        var ballX = -1
-
-        val gameDisplay = Array(yMax + 1) { Array(xMax + 1) { " " } }
-        tiles.forEach {
-            gameDisplay[it[1]][it[0]] = when (it[2]) {
-                0 -> " "
-                1 -> "■"
-                2 -> "⬚"
-                3 -> {
-                    paddleX = it[0]
-                    "-"
-                }
-                4 -> {
-                    ballX = it[0]
-                    "●"
-                }
-                else -> throw Exception("Unrecognized input ${it[2]}")
+fun recursiveSearchForOxygen(
+    prog: List<Long>, path: List<Coord>, last: Execution?
+): Pair<List<Coord>, Execution>? {
+    return (1..4L).mapNotNull { i ->
+        val next = path.last().move(i.toInt())
+        if (path.contains(next)) null
+        else {
+            val execution = if (last == null) {
+                intcode(prog, mutableListOf(i))
+            } else {
+                intcode(
+                    last.prog,
+                    mutableListOf(i),
+                    last.startIndex,
+                    last.relativeOffset,
+                    true)
+            }
+            when (execution.outputs.last().toInt()) {
+                0 -> null
+                1 -> recursiveSearchForOxygen(prog, path + next, execution)
+                2 -> Pair(path + next, execution)
+                else ->
+                    throw Exception(
+                        "you did whaaat?!?!?!?! $path,\n$last,\n$execution")
             }
         }
-//        gameDisplay.forEach { line ->
-//            line.forEach { print(it) }
-//            println()
-//        }
-        // Always move the paddle in the direction of the ball
-        val paddleInput = when {
-            paddleX < ballX -> 1
-            paddleX == ballX -> 0
-            else -> -1
+    }.minBy { it.first.size }
+}
+
+fun searchFromOxygen(
+    path: List<Coord>, last: Execution
+): Map<Coord, Int> {
+    return (1..4L).mapNotNull { i ->
+        val next = path.last().move(i.toInt())
+        if (path.contains(next)) null
+        else {
+            val execution =
+                intcode(
+                    last.prog,
+                    mutableListOf(i),
+                    last.startIndex,
+                    last.relativeOffset,
+                    true)
+            when (execution.outputs.last().toInt()) {
+                0 -> path.mapIndexed { j, v -> Pair(v, j) }.toMap()
+                1 -> searchFromOxygen(path + next, execution)
+                2 -> (path + next).mapIndexed { j, v -> Pair(v, j) }.toMap()
+                else ->
+                    throw Exception(
+                        "you did whaaat?!?!?!?! $path,\n$last,\n$execution")
+            }
         }
+    }.flatMap { it.entries }.groupBy { it.key }.mapValues { v -> v.value.map { it.value }.min()!! }
+}
 
-        execution =
-                evalSpec(
-                        execution.prog,
-                        listOf(paddleInput.toLong()),
-                        execution.startIndex,
-                        execution.relativeOffset,
-                        true)
+fun Coord.move(d: Int): Coord {
+    return when (d) {
+        1 -> Coord(this.x, this.y + 1)
+        2 -> Coord(this.x, this.y - 1)
+        3 -> Coord(this.x - 1, this.y)
+        4 -> Coord(this.x + 1, this.y)
+        else -> throw Exception("Wher are you going? $this $d")
     }
-    val output = execution.outputs
-
-    val triples = output.map { it.toInt() }.chunked(3)
-    val scoreDisplayPair = triples.partition { it[0] == -1 }
-    val scoreTriples = scoreDisplayPair.first
-    if (scoreTriples.isNotEmpty()) {
-        score = scoreTriples.last()[2]
-        println("New score: $score")
-    }
-    return score
 }
 
 /**
@@ -93,14 +92,14 @@ private fun playArcade(endlessQuarters: MutableList<Long>): Int {
  *
  * Returns a tuple of <latest output, current execution instruction index, and the [Instruction] at that index.
  */
-fun evalSpec(
-        program: List<Long>,
-        inputs: List<Long>? = mutableListOf(1),
-        startIndex: Int = 0,
-        initialRelativeOffset: Int = 0,
-        hasRam: Boolean = false): Execution {
+fun intcode(
+    program: List<Long>,
+    inputs: List<Long>? = null,
+    startIndex: Int = 0,
+    initialRelativeOffset: Int = 0,
+    hasRam: Boolean = false): Execution {
     val prog: MutableList<Long> = program.toMutableList()
-    if (!hasRam) prog.addAll(generateSequence { 0L }.take(3000))
+    if (!hasRam) prog.addAll(generateSequence { 0L }.take(5))
     var programIndex = startIndex
     var instr = parseInstruction(prog[programIndex].toInt())
     var inputIndex = 0
@@ -177,6 +176,9 @@ fun evalSpec(
 //    println("Terminating: $output, $programIndex")
     return Execution(prog, outputs, programIndex, HaltOp, relativeOffset)
 }
+
+
+data class Coord(val x: Int, val y: Int)
 
 fun parseInstruction(instr: Int): Instruction {
     val action = when (val opcode = instr % 100) {
@@ -263,15 +265,15 @@ sealed class Instruction
 
 /** Specifies a [UnaryAction] and how to read/write inputs/outputs. */
 data class UnaryInstruction(
-        val action: UnaryAction, val inMode: Mode, val outMode: Mode
+    val action: UnaryAction, val inMode: Mode, val outMode: Mode
 ): Instruction()
 
 /** Specifies a [BinaryAction] and how to read/write input/outputs. */
 data class BinaryInstruction(
-        val action: BinaryAction,
-        val firstInMode: Mode,
-        val secondInMode: Mode,
-        val outMode: Mode
+    val action: BinaryAction,
+    val firstInMode: Mode,
+    val secondInMode: Mode,
+    val outMode: Mode
 ): Instruction()
 
 /** Special instruction to consume std in, and write it to a location. */
@@ -292,8 +294,8 @@ data class ModifyRelativeOffset(val mode: Mode): Instruction()
 object HaltOp: Instruction()
 
 data class Execution(
-        val prog: List<Long>,
-        val outputs: List<Long>,
-        val startIndex: Int,
-        val exitInstr: Instruction,
-        val relativeOffset: Int)
+    val prog: List<Long>,
+    val outputs: List<Long>,
+    val startIndex: Int,
+    val exitInstr: Instruction,
+    val relativeOffset: Int)
