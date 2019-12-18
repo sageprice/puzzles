@@ -15,7 +15,8 @@ fun main() {
     // Part 1
     val execution = evalSpec(programSpec)
     val chars = execution.outputs.map { it.toChar() }
-    val lines = chars.filterNot { it == '\n' }.chunked(chars.indexOf('\n'))
+    val lines =
+        chars.filterNot { it == '\n' }.chunked(chars.indexOf('\n'))
     val width = lines[0].size
     val height = lines.size
 //    lines.forEach { println(it.map { it.toString() }.reduce { a, b -> a + b }) }
@@ -35,7 +36,52 @@ fun main() {
         }
     }
     println("Part 1: $alignmentParamsSum")
+
+    // Part 2:
+
+    val mainRoutine = "A,B,A,C,B,C,B,C,A,C\n".toAsciiInput()
+    val moveA = "R,12,L,6,R,12\n".toAsciiInput()
+    val moveB = "L,8,L,6,L,10\n".toAsciiInput()
+    val moveC = "R,12,L,10,L,6,R,10\n".toAsciiInput()
+
+    val overriddenProg = programSpec.toMutableList()
+    overriddenProg[0] = 2
+
+    val metaExec = evalSpec(overriddenProg, inputs = mainRoutine)
+    val metaA =
+        evalSpec(metaExec.prog, moveA, metaExec.startIndex, metaExec.relativeOffset, true)
+    val metaB =
+        evalSpec(metaA.prog, moveB, metaA.startIndex, metaA.relativeOffset, true)
+    val metaC =
+        evalSpec(metaB.prog, moveC, metaB.startIndex, metaB.relativeOffset, true)
+    val finalExecution =
+        evalSpec(
+            metaC.prog,
+            "n\n".toAsciiInput(),
+            metaC.startIndex,
+            metaC.relativeOffset,
+            true)
+//    println(finalExecution)
+    println("Part 2: ${finalExecution.outputs.last()}")
+    // Naive path (go to the end, turn, keep going): ABACBCBCAC   A,B,A,C,B,C,B,C,A,C
+    // R, 12, L, 6, R, 12, = A
+    // L, 8, L, 6, L, 10,  = B
+    // R, 12, L, 6, R, 12, = A
+    // R, 12, L, 10, L, 6, R, 10, = C
+    // L, 8, L, 6, L, 10,  = B
+    // R, 12, L, 10, L, 6, R, 10, = C
+    // L, 8, L, 6, L, 10, = B
+    // R, 12, L, 10, L, 6, R, 10, = C
+    // R, 12, L, 6, R, 12, = A
+    // R, 12, L, 10, L, 6, R, 10, = C
+
+    // R,12,L,6,R,12
+    // L,8,L,6,L,10
+    // R,12,L,10,L,6,R,10
+
 }
+
+fun String.toAsciiInput(): List<Long> = this.toCharArray().map { it.toLong() }
 
 /**
  * Executes an intcode program, with the given inputs, starting from the provided index.
