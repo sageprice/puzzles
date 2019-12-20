@@ -3,7 +3,7 @@ package adventofcode.`2019`.`17`
 import java.io.File
 
 /**
- * Solution for [Advent of Code day 10](https://adventofcode.com/2019/day/10).
+ * Solution for [Advent of Code day 17](https://adventofcode.com/2019/day/17).
  */
 fun main() {
     // Read input file
