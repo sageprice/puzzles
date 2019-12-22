@@ -29,18 +29,7 @@ fun main() {
         }
     }
 //    endPoints.groupBy { it.label }.filter { it.value.size >= 2 }.forEach { v -> println("$v") }
-    val minPaths = Array(donut.size) { Array(donut[2].length + 1) { 0 } }
-    for (y in minPaths.indices) {
-        for (x in minPaths[y].indices) {
-            if (x in donut[y].indices) {
-                minPaths[y][x] = when (donut[y][x]) {
-                    '#' -> 0
-                    '.' -> Int.MAX_VALUE
-                    else -> 0
-                }
-            }
-        }
-    }
+    val minPaths = newMaze(donut)
     val minPathFilled = exploreMaze(minPaths, start, warpPoints)
 //    minPathFilled.forEachIndexed { i, arr ->
 //        print("$i:\t")
@@ -51,6 +40,12 @@ fun main() {
 //        println()
 //    }
     println("Part 1: ${minPathFilled[end.second][end.first]}")
+
+    // Part 2
+    var recursiveMazes = mutableMapOf<Int, Array<Array<Int>>>()
+    (0..36).forEach { recursiveMazes[it] = newMaze(donut) }
+    recursiveMazes = exploreRecursiveMazes(recursiveMazes, start, warpPoints) as MutableMap<Int, Array<Array<Int>>>
+    println("Part 2: ${recursiveMazes[0]!![end.second][end.first]}")
 }
 
 fun exploreMaze(minPaths: Array<Array<Int>>, start: Pair<Int, Int>, warps: Map<Pair<Int, Int>, Pair<Int, Int>>): Array<Array<Int>> {
@@ -122,3 +117,56 @@ fun getEndPoints(maze: List<String>): List<EndPoint> {
 }
 
 data class EndPoint(val x: Int, val y: Int, val label: String)
+
+fun newMaze(donut: List<String>): Array<Array<Int>> {
+    val maze = Array(donut.size) { Array(donut[2].length + 1) { 0 } }
+    for (y in maze.indices) {
+        for (x in maze[y].indices) {
+            if (x in donut[y].indices) {
+                maze[y][x] = when (donut[y][x]) {
+                    '#' -> 0
+                    '.' -> Int.MAX_VALUE
+                    else -> 0
+                }
+            }
+        }
+    }
+    return maze
+}
+
+fun exploreRecursiveMazes(
+    mazes: Map<Int, Array<Array<Int>>>,
+    start: Pair<Int, Int>,
+    warps: Map<Pair<Int, Int>, Pair<Int, Int>>): Map<Int, Array<Array<Int>>> {
+    val startPoint = RecursivePoint(start.first, start.second, 0, 0)
+    val resumePoints: MutableList<RecursivePoint> = mutableListOf(startPoint)
+    loop@ while (resumePoints.isNotEmpty()) {
+        val point = resumePoints.removeAt(0)
+        val curMaze = mazes[point.depth]?: throw Exception("No maze at depth ${point.depth}")
+        when {
+            curMaze[point.y][point.x] <= point.d -> continue@loop
+            curMaze[point.y][point.x] > point.d -> {
+                curMaze[point.y][point.x] = point.d
+                resumePoints.add(RecursivePoint(point.x + 1, point.y, point.d + 1, point.depth))
+                resumePoints.add(RecursivePoint(point.x - 1, point.y, point.d + 1, point.depth))
+                resumePoints.add(RecursivePoint(point.x, point.y + 1, point.d + 1, point.depth))
+                resumePoints.add(RecursivePoint(point.x, point.y - 1, point.d + 1, point.depth))
+                if (warps.containsKey(Pair(point.x, point.y))) {
+                    val newDepth = point.depth + when {
+                        point.x < 4 -> -1
+                        point.x > 111 -> -1
+                        point.y < 4 -> -1
+                        point.y > 111 -> -1
+                        else -> 1
+                    }
+                    if (newDepth < 0 || newDepth > 35) continue@loop
+                    val target = warps[Pair(point.x, point.y)] ?: error("That's not a warp point! $point")
+                    resumePoints.add(RecursivePoint(target.first, target.second, point.d + 1, newDepth))
+                }
+            }
+        }
+    }
+    return mazes
+}
+
+data class RecursivePoint(val x: Int, val y: Int, val d: Int, val depth: Int)
