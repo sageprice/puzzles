@@ -11,7 +11,8 @@ fun main() {
     val eris =
         File("src/adventofcode/2019/24/input.txt")
             .readLines()
-            .map { it.toCharArray() }.toTypedArray()
+            .map { it.toCharArray() }
+            .toTypedArray()
 
     // Part 1
     var e0 = eris.clone()
@@ -26,6 +27,109 @@ fun main() {
 
     println("Part 1: ${e0.biodiversity()}")
 
+    // Part 2
+    val base = eris.clone()
+    base[2][2] = '?'
+    var erises = mapOf<Int, Array<CharArray>>(0 to base)
+    for (i in 1..200) {
+        erises = nextWorld(erises)
+    }
+    println("Part 2: " +
+            "${erises
+                .map { it.value }
+                .map { it.map { it.count { it == '#' } }.sum() }
+                .sum()}")
+}
+
+fun nextWorld(erises: Map<Int, Array<CharArray>>): Map<Int, Array<CharArray>> {
+    val newErises = mutableMapOf<Int, Array<CharArray>>()
+    for (e in erises) {
+        val i = e.key
+        val m = e.value
+        val e1 = recurseLevel(erises[i+1], m, erises[i-1])
+        newErises[i] = e1
+    }
+    val eLow = erises.keys.min()!!
+    var newLow = Array(5) { CharArray(5) { '.' } }
+    newLow[2][2] = '?'
+    newLow = recurseLevel(erises[eLow], newLow, null)
+    if (newLow.any { it.any { it == '#' } } ) newErises[eLow - 1] = newLow
+    val eHigh = erises.keys.max()!!
+    var newHigh = Array(5) { CharArray(5) { '.' } }
+    newHigh[2][2] = '?'
+    newHigh = recurseLevel(null, newHigh, erises[eHigh])
+    if (newHigh.any { it.any { it == '#' } } ) newErises[eHigh + 1] = newHigh
+    return newErises
+}
+
+fun recurseLevel(
+    up: Array<CharArray>?,
+    c: Array<CharArray>,
+    down: Array<CharArray>?
+): Array<CharArray> {
+    val c1 = Array(c.size) { CharArray(c[0].size) { '.' } }
+
+    for (i in c1.indices) {
+//        println()
+//        c1.prettyPrint()
+        for (j in c1[0].indices) {
+            if (i == 2 && j == 2) continue
+            var adjacentBugs = 0
+            //      up
+            if (i-1 in c.indices) {
+                if (c[i - 1][j] == '#') adjacentBugs++
+                else if (c[i - 1][j] == '?' && down != null)
+                    adjacentBugs += down.last().count { it == '#' }
+            }
+            else {
+                    if (up != null && up[1][2] == '#') {
+                        adjacentBugs++
+                    }
+            }
+
+            //      down
+            if (i+1 in c.indices) {
+                if (c[i + 1][j] == '#') adjacentBugs++
+                else if (c[i + 1][j] == '?' && down != null)
+                    adjacentBugs += down.first().count { it == '#' }
+            } else {
+                if (up != null && up[3][2] == '#') {
+                    adjacentBugs++
+                }
+            }
+
+            //      left
+            if (j-1 in c[0].indices) {
+                if (c[i][j - 1] == '#') adjacentBugs++
+                else if (c[i][j - 1] == '?' && down != null)
+                    adjacentBugs += down.map { it.last() }.count { it == '#' }
+            } else {
+                if (up != null && up[2][1] == '#') {
+                    adjacentBugs++
+                }
+            }
+
+            //      right
+            if (j+1 in c[0].indices) {
+                if (c[i][j + 1] == '#') adjacentBugs++
+                else if (c[i][j + 1] == '?' && down != null)
+                    adjacentBugs += down.map { it.first() }.count { it == '#' }
+            } else {
+                if (up != null && up[2][3] == '#') {
+                    adjacentBugs++
+                }
+            }
+
+            c1[i][j] = when {
+                c[i][j] == '#' && adjacentBugs == 1 -> '#'
+                c[i][j] == '#' && adjacentBugs != 1 -> '.'
+                c[i][j] == '.' && adjacentBugs in 1..2 -> '#'
+                else -> c[i][j]
+            }
+        }
+    }
+    c1[2][2] = '?'
+    return c1
 }
 
 fun nextState(s0: Array<CharArray>): Array<CharArray> {
