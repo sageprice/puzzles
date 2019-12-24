@@ -30,7 +30,7 @@ fun main() {
     // Part 2
     val base = eris.clone()
     base[2][2] = '?'
-    var erises = mapOf<Int, Array<CharArray>>(0 to base)
+    var erises = mapOf(0 to base)
     for (i in 1..200) {
         erises = nextWorld(erises)
     }
