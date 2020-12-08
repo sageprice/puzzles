@@ -33,6 +33,8 @@ fun executeUntilCompletion(instrs: List<Instruction>): Int {
   error("Could not find correct instruction to flip")
 }
 
+// Returns the final value of the accumulator at program end or when a loop is found.
+// The first value is True IFF the program executes to completion.
 fun executeUntilLoop(instrs: List<Instruction>): Pair<Boolean, Int> {
   var acc = 0
   var index = 0
