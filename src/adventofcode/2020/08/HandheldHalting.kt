@@ -18,6 +18,7 @@ fun main() {
 fun executeUntilCompletion(instrs: List<Instruction>): Int {
   for (i in instrs.indices) {
     val modifiedInstrs = instrs.toMutableList()
+    if (instrs[i] is Acc) continue
     when (val ogInstr = instrs[i]) {
       is NoOp -> {
         modifiedInstrs[i] = Jump(ogInstr.value)
@@ -25,7 +26,6 @@ fun executeUntilCompletion(instrs: List<Instruction>): Int {
       is Jump -> {
         modifiedInstrs[i] = NoOp(ogInstr.value)
       }
-      is Acc -> continue
     }
     val result = executeUntilLoop(modifiedInstrs)
     if (result.first) return result.second
