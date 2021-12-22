@@ -65,13 +65,13 @@ fun findShortestPath(found: String, missing: String, paths: Map<Pair<Char, Char>
         if (p == null || p.isEmpty()) null else {
             val minD = p.filter { it.second.all { found.contains(it) } }
                 .map { it.first }
-                .min()
+                .minOrNull()
             if (minD == null) null else {
                 val rest = findShortestPath(found + c, missing.filterNot { it == c }, paths)
                 if (rest == null) null else rest + minD
             }
         }
-    }.min()
+    }.minOrNull()
 }
 
 fun dBetween(start: Char, end: Char, requiredKeys: Set<Char>, x: Int, y: Int, visited: List<Pair<Int, Int>>): List<Pair<Int, Set<Char>>>? {
@@ -97,7 +97,7 @@ fun dBetween(start: Char, end: Char, requiredKeys: Set<Char>, x: Int, y: Int, vi
     return listOfNotNull(left, right, up, down)
         .flatten()
         .groupBy { it.second }
-        .mapValues { e -> e.value.map { it.first }.min()!! }
+        .mapValues { e -> e.value.map { it.first }.minOrNull()!! }
         .map { Pair(it.value, it.key) }
 }
 

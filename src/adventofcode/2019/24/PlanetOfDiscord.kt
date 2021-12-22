@@ -49,12 +49,12 @@ fun nextWorld(erises: Map<Int, Array<CharArray>>): Map<Int, Array<CharArray>> {
         val e1 = recurseLevel(erises[i+1], m, erises[i-1])
         newErises[i] = e1
     }
-    val eLow = erises.keys.min()!!
+    val eLow = erises.keys.minOrNull()!!
     var newLow = Array(5) { CharArray(5) { '.' } }
     newLow[2][2] = '?'
     newLow = recurseLevel(erises[eLow], newLow, null)
-    if (newLow.any { it.any { it == '#' } } ) newErises[eLow - 1] = newLow
-    val eHigh = erises.keys.max()!!
+    if (newLow.any { it.any { c -> c == '#' } } ) newErises[eLow - 1] = newLow
+    val eHigh = erises.keys.maxOrNull()!!
     var newHigh = Array(5) { CharArray(5) { '.' } }
     newHigh[2][2] = '?'
     newHigh = recurseLevel(null, newHigh, erises[eHigh])

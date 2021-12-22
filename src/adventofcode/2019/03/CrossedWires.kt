@@ -19,20 +19,20 @@ fun main() {
   val secondWireDisplacements = getWirePath(instructions[1])
   val secondSet = secondWireDisplacements.toSet()
   val connections: List<Point> = firstWireDisplacements.filter { secondSet.contains(it) }
-  println("Part 1 answer: ${connections.map { abs(it.x) + abs(it.y) }.filter { it > 0 }.min()}")
+  println("Part 1 answer: ${connections.map { abs(it.x) + abs(it.y) }.filter { it > 0 }.minOrNull()!!}")
 
   // Part 2
   var dMin = 100000000
   for (connection in connections) {
       var d1: Int = 100000
       var d2: Int = 100000
-      for (i in 0 until firstWireDisplacements.size) {
+      for (i in firstWireDisplacements.indices) {
           if (firstWireDisplacements[i] == connection) {
             d1 = i
             break
           }
       }
-      for (i in 0 until secondWireDisplacements.size) {
+      for (i in secondWireDisplacements.indices) {
           if (secondWireDisplacements[i] == connection) {
             d2 = i
             break

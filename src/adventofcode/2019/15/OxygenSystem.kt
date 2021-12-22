@@ -19,7 +19,7 @@ fun main() {
     val executionToOxygen = searchResult.second
     val search = searchFromOxygen(listOf(searchResult.first.last()), executionToOxygen)
 //    println(search)
-    println("Part 2: longest distance from oxygen is length ${search.values.max()}")
+    println("Part 2: longest distance from oxygen is length ${search.values.maxOrNull()}")
 }
 
 fun recursiveSearchForOxygen(
@@ -48,7 +48,7 @@ fun recursiveSearchForOxygen(
                         "you did whaaat?!?!?!?! $path,\n$last,\n$execution")
             }
         }
-    }.minBy { it.first.size }
+    }.minByOrNull { it.first.size }
 }
 
 fun searchFromOxygen(
@@ -74,7 +74,7 @@ fun searchFromOxygen(
                         "you did whaaat?!?!?!?! $path,\n$last,\n$execution")
             }
         }
-    }.flatMap { it.entries }.groupBy { it.key }.mapValues { v -> v.value.map { it.value }.min()!! }
+    }.flatMap { it.entries }.groupBy { it.key }.mapValues { v -> v.value.minOf { it.value } }
 }
 
 fun Coord.move(d: Int): Coord {

@@ -30,10 +30,10 @@ fun main() {
 
     // Part 2 -- Prints puzzle sideways but IDC
     val actualLicense = runAnt(programSpec, 1)
-    val loX = actualLicense.keys.map { it.first }.min()!!
-    val hiX = actualLicense.keys.map { it.first }.max()!!
-    val loY = actualLicense.keys.map { it.second }.min()!!
-    val hiY = actualLicense.keys.map { it.second }.max()!!
+    val loX = actualLicense.keys.map { it.first }.minOrNull()!!
+    val hiX = actualLicense.keys.map { it.first }.maxOrNull()!!
+    val loY = actualLicense.keys.map { it.second }.minOrNull()!!
+    val hiY = actualLicense.keys.map { it.second }.maxOrNull()!!
     val cleanLicense = actualLicense.mapKeys { Pair(it.key.first - loX, it.key.second - loY) }
     val license = Array(hiX - loX + 1) { Array(hiY - loY + 1) { " " } }
     for (key in cleanLicense.keys) {

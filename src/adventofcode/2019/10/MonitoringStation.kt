@@ -31,7 +31,7 @@ fun main() {
     val bestStation =
             asteroids
                     .map { Pair(it, asteroids.size - occlusions[it.y][it.x] - 1) }
-                    .maxBy { it.second }
+                    .maxByOrNull { it.second }
     println("Part 1: $bestStation")
 
     // Part 2

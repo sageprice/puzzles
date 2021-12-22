@@ -34,8 +34,8 @@ private fun playArcade(endlessQuarters: MutableList<Long>): Int {
         }
         val tiles: List<List<Int>> = scoreDisplayPair.second
 
-        val xMax = tiles.map { it[0] }.max()!!
-        val yMax = tiles.map { it[1] }.max()!!
+        val xMax = tiles.maxOf { it[0] }
+        val yMax = tiles.maxOf { it[1] }
 
         var paddleX = -1
         var ballX = -1
