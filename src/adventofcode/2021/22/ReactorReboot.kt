@@ -1,7 +1,6 @@
 package adventofcode.`2021`.`22`
 
 import java.io.File
-import java.math.BigInteger
 import kotlin.math.max
 import kotlin.math.min
 
@@ -23,10 +22,10 @@ fun main() {
   }
   println(getProperBoxes(limitedBoxes).entries.sumOf { (t, count) ->
     val (xs, ys, zs) = t
-    BigInteger.valueOf(count * xs.length() * ys.length() * zs.length())
+    count * xs.length() * ys.length() * zs.length()
   })
 
-  // part 2
+  // Part 2
   println(getProperBoxes(boxes).entries.sumOf { (t, count) ->
     val (xs, ys, zs) = t
     count * xs.length() * ys.length() * zs.length()
