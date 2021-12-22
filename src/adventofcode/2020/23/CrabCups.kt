@@ -13,7 +13,7 @@ fun main() {
   println("Part 1: $answer")
 
   // Part 2
-  val game2Out = simulateMapGame(input + ((input.max()!! + 1) .. 1_000_000), 10_000_000)
+  val game2Out = simulateMapGame(input + ((input.maxOrNull()!! + 1) .. 1_000_000), 10_000_000)
   val first = game2Out[1]!!
   val second = game2Out[first]!!
   println("Part 2: ${first.toLong() * second.toLong()}")
@@ -21,7 +21,7 @@ fun main() {
 
 private fun simulateMapGame(cups: List<Int>, steps: Int): Map<Int, Int> {
   // Didn't feel like writing a linked list, so I'm abusing a map to act as one.
-  val maxCup = cups.max()!!
+  val maxCup = cups.maxOrNull()!!
   val gameState = mutableMapOf<Int, Int>()
   (0 until cups.size-1).forEach { gameState[cups[it]] = cups[it+1] }
   gameState[cups.last()] = cups.first()

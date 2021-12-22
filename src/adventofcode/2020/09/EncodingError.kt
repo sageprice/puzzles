@@ -45,7 +45,7 @@ private fun findSumRange(nums: List<Long>, target: Long): Long {
     runningSums.add(runningSums[i-1] + nums[i])
     for (j in 0 until i) {
       if (runningSums[i] - runningSums[j] == target) {
-        return nums.subList(j+1, i+1).min()!! + nums.subList(j+1, i+1).max()!!
+        return nums.subList(j+1, i+1).minOrNull()!! + nums.subList(j+1, i+1).minOrNull()!!
       }
     }
   }

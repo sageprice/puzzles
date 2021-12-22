@@ -11,7 +11,9 @@ fun main() {
   val ids = input[1].split(",").filter { it != "x" }.map { it.toInt() }
 
   // Part 1
-  val answer = ids.map { Pair(it, (it * (1 + arrivalTime / it) - arrivalTime)) }.minBy { it.second }!!
+  val answer = ids
+    .map { Pair(it, (it * (1 + arrivalTime / it) - arrivalTime)) }
+    .minByOrNull { it.second }!!
   println("Part 1: " + answer.first * answer.second)
 
   // Part 2

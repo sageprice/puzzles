@@ -9,7 +9,7 @@ fun main() {
       .map { extractPass(it) }
 
   // Part 1
-  println(boardingPasses.map { it.getSeatId() }.max())
+  println(boardingPasses.map { it.getSeatId() }.maxOrNull())
 
   // Part 2
   val sortedIds = boardingPasses.map { it.getSeatId() }.sorted()
