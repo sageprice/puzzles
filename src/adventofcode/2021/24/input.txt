@@ -1,0 +1,210 @@
+inp w # <----------------------- i1
+add x 1
+add z w
+add z 7 # z = i1+7
+inp w # <-------------------------- i2
+mul x 0
+add x z
+add x 12 # x = i1+19
+eql x w # So if we can set x == the latest input, this will force x=0 in the rest of this section
+eql x 0 # x = 1
+mul y 0
+add y 26
+mul z y
+mul y 0
+add y w
+add y 4
+mul y x
+add z y # z = 26*(i1+7) + i2+4
+inp w # <-------------------------- i3
+mul x 0
+add x 1 # x = 1
+mul y 0
+add y 26
+mul z y
+mul y 0
+add y w
+add y 8
+mul y x
+add z y # z = 26*(26*(i1+7) + i2+4) + i3+8
+inp w # <-------------------------- i4
+mul x 0
+add x z
+mod x 26
+div z 26 # z = 26*(i1+7) + i2+4
+add x -4
+eql x w
+eql x 0 # SET i4 = i3+4 to get x=0
+mul y 0
+add y 25
+mul y x
+add y 1 # y = 1
+mul z y
+mul y 0
+add y w
+add y 1
+mul y x
+add z y # z = 26*(i1+7) + i2+4
+inp w # <-------------------------- i5
+mul x 0
+add x 1 # x = 1
+mul y 0
+add y 26
+mul z y
+mul y 0
+add y w
+add y 5
+mul y x
+add z y # z = 26*(26*(i1+7) + i2+4) + i5+5
+inp w # <-------------------------- i6
+mul x 0
+add x z
+mod x 26
+add x 10 # x = i5+15
+eql x w
+eql x 0 # x = 1
+mul y 0
+add y 26
+mul z y
+mul y 0
+add y w
+add y 14
+mul y x
+add z y # z = 26*(26*(26*(i1+7) + i2+4) + i5+5) + i6+14
+inp w # <-------------------------- i7
+mul x 0
+add x 1 # x=1
+mul y 0
+add y 26
+mul z y
+mul y 0
+add y w
+add y 12
+mul y x
+add z y # z = 26*(26*(26*(26*(i1+7) + i2+4) + i5+5) + i6+14) + i7+12
+inp w # <-------------------------- i8
+mul x 0
+add x z
+mod x 26
+div z 26 # z = 26*(26*(26*(i1+7) + i2+4) + i5+5) + i6+14
+add x -9 # SET i8 = i7+3 to get x=0
+eql x w
+eql x 0 # x=1
+mul y 0
+add y 25
+mul y x
+add y 1 # y=1
+mul z y
+mul y 0
+add y w
+add y 10
+mul y x
+add z y # z = 26*(26*(26*(i1+7) + i2+4) + i5+5) + i6+14
+inp w # <-------------------------- i9
+mul x 0
+add x z
+mod x 26
+div z 26 # z = 26*(26*(i1+7) + i2+4) + i5+5
+add x -9 # SET i9 = i6+5 to get x=0
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 5
+mul y x
+add z y # z = 26*(26*(i1+7) + i2+4) + i5+5
+inp w # <-------------------------- i10
+mul x 0
+add x z
+mod x 26
+div z 1
+add x 12
+eql x w
+eql x 0 # x=1
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 7
+mul y x
+add z y # z = 26*(26*(26*(i1+7) + i2+4) + i5+5) + i10+7
+inp w # <-------------------------- i11
+mul x 0
+add x z
+mod x 26
+div z 26 # z = 26*(26*(i1+7) + i2+4) + i5+5
+add x -15 # SET i11 = i10-8 to get x=0
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 6
+mul y x
+add z y # z = 26*(26*(i1+7) + i2+4) + i5+5
+inp w # <-------------------------- i12
+mul x 0
+add x z
+mod x 26
+div z 26
+add x -7 # x = i5-2
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 8
+mul y x
+add z y # z = 26*(i1+7) + i2+4
+inp w # <-------------------------- i13
+mul x 0
+add x z
+mod x 26
+div z 26 # z = i1+7
+add x -10 # x = i2-6
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 4
+mul y x
+add z y # z = i1+7
+inp w # <-------------------------- i14
+mul x 0
+add x z
+mod x 26
+div z 26
+add x 0
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 6
+mul y x
+add z y
