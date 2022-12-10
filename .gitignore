@@ -4,3 +4,5 @@ puzzles.iml
 out
 **/*.jar
 lib
+# apparently we aren't supposed to commit our input files
+*/*/*/*/input.txt
