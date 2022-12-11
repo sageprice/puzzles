@@ -7,22 +7,20 @@ fun main() {
     .readText()
     .split("\r\n\r\n")
     .map { it.split("\r\n") }
-
   val monkeysItems: List<List<Long>> = extractMonkeyItems(monkeys)
-
-  // Assumes all divisors are relatively prime (appears to be the case for my input and example).
-  val base = (listOf(3L) + // just in case 3 isn't in the list of bases
-      monkeys.map { mc -> mc[3].split(" ").last().toLong() })
-        .distinct()
-        .reduce { a, b -> a * b }
-  println("Working in base $base")
   val configs = monkeys.map { mc -> parseMonkeyConfig(mc) }
 
+  // Part 1
   var inspections = monkeyAbout(monkeysItems, configs, 20) { x -> x / 3 }
   val monkeyBusiness = inspections.sorted().takeLast(2).reduce { a, b -> a * b }
   println(monkeyBusiness)
 
   // Part 2
+  // Assumes all divisors are relatively prime (appears to be the case for my input and example).
+  val base = (listOf(3L) + // just in case 3 isn't in the list of bases
+      monkeys.map { mc -> mc[3].split(" ").last().toLong() })
+    .distinct()
+    .reduce { a, b -> a * b }
   inspections = monkeyAbout(monkeysItems, configs, 10_000) { x -> x % base }
   val moreMonkeyBusiness = inspections.sorted().takeLast(2).reduce { a, b -> a * b }
   println(moreMonkeyBusiness)
