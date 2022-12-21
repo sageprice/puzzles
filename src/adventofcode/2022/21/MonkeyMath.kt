@@ -8,8 +8,6 @@ fun main() {
     .map { parseYell(it) }
 
   // Part 1
-  val waitingMonkeys = mutableMapOf<String, Yell>()
-  input.forEach { (k, v) -> waitingMonkeys[k] = v }
   val yellResults = propagateMonkeyYells(input)
   println(yellResults["root"])
 
