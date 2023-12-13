@@ -10,15 +10,10 @@ fun main() {
       .map { (springs, seq) ->
         SpringRecord(springs, seq.split(",").map { it.toInt() })
       }
+
   println(springRecords.sumOf { (spr, seq) -> getValidConfigurations(spr, seq) })
 
-  var count = 0L
-  for (i in springRecords.indices) {
-    val (spr, seq) = springRecords[i].expand(5)
-    count += getValidConfigurations(spr, seq)
-    println("Finished with ${i+1} records, last was [$spr, $seq]")
-  }
-  println(count)
+  println(springRecords.map { it.expand(5) }.sumOf { (spr, seq) -> getValidConfigurations(spr, seq) })
 }
 
 private fun SpringRecord.expand(k: Int): SpringRecord {
@@ -34,55 +29,61 @@ private fun SpringRecord.expand(k: Int): SpringRecord {
 private val cache = mutableMapOf<Pair<String, List<Int>>, Long>()
 
 private fun getValidConfigurations(springs: String, sequence: List<Int>, index: Int = 0): Long {
-//  println(" ".repeat(index) + "Getting configurations for $springs")
+  // Oh look, we made it
   if (index == springs.length) {
-//    println("Success! $springs, $sequence")
     return 1L
   }
-  if (springs[index] != '?') return getValidConfigurations(springs, sequence, index + 1)
+  val prefix = springs.substring(0, index)
+  val suffix = springs.substring(index)
+  val parts = prefix.replace(".", " ").trim().split(" ").filter { it.isNotBlank() }
+  var remainingSeq: List<Int>? = null
+  // We try to cache whenever there is a fully defined sequence of springs in the prefix (no potential continuation).
+  if ((index > 0 && springs[index-1] == '.') && parts.zip(sequence).all { (p, l) -> p.length == l }) {
+    remainingSeq = sequence.subList(parts.size, sequence.size)
+    val suffixCount = cache[Pair(suffix, remainingSeq)]
+    if (suffixCount != null) return suffixCount
+  }
   var results = 0L
+  // Just iterate onwards.
+  if (springs[index] != '?') {
+    results = getValidConfigurations(springs, sequence, index + 1)
+    if (remainingSeq != null) cache[Pair(suffix, remainingSeq)] = results
+    return results
+  }
+  // Handle replacements
   val busted = springs.replaceRange(index.. index, ".")
-//  println(" ".repeat(index+2) + busted)
   if (isOkaySequence(busted, sequence)) {
     results += getValidConfigurations(busted, sequence, index+1)
   }
   val working = springs.replaceRange(index.. index, "#")
-//  println(" ".repeat(index+2) + working)
   if (isOkaySequence(working, sequence)) {
     results += getValidConfigurations(working, sequence, index+1)
   }
+  if (remainingSeq != null) cache[Pair(suffix, remainingSeq)] = results
   return results
 }
 
 private fun isOkaySequence(springs: String, sequence: List<Int>): Boolean {
   if (!springs.contains("?")) {
-    val cleaned = springs.replace(".", " ").trim().split(" ").filter { it.isNotBlank() }
+    val cleaned = getPrefixSpringGroups(springs)
     return cleaned.size == sequence.size && cleaned.zip(sequence).all { (a, b) -> a.length == b }
   }
   val idx = springs.indexOfFirst { it == '?' }
-  val fixed = springs.substring(0 until idx)
-  val tail = springs.substring(idx)
-  if (fixed.isEmpty()) return true
-  val cleaned = fixed.replace(".", " ").trim().split(" ").filter { it.isNotBlank() }
-//  println("$fixed -> $cleaned")
+  val prefix = springs.substring(0 until idx)
+  if (prefix.isEmpty()) return true
+  val cleaned = getPrefixSpringGroups(prefix)
   if (cleaned.size > sequence.size) return false
-  val tailSeq = sequence.subList(cleaned.size, sequence.size)
-  if (isOkayTail(tail, tailSeq))
   for (i in 0 until cleaned.size - 1) {
     if (cleaned[i].length != sequence[i]) {
       return false
     }
   }
-//  println("$cleaned :==: $sequence")
   if (cleaned.isEmpty()) return true
   return cleaned.last().length == sequence[cleaned.size-1] ||
-      (fixed.endsWith("#") && cleaned.last().length < sequence[cleaned.size-1])
+      (prefix.endsWith("#") && cleaned.last().length < sequence[cleaned.size-1])
 }
 
-private fun isOkayTail(tail: String, sequence: List<Int>): Boolean {
-  if (tail.length < sequence.sum() + sequence.size - 1) return false
-  if (tail.count { it == '#' } > sequence.sum()) return false
-  return true
-}
+private fun getPrefixSpringGroups(springs: String): List<String> =
+  springs.replace(".", " ").trim().split(" ").filter { it.isNotBlank() }
 
 private data class SpringRecord(val springs: String, val sequence: List<Int>)
