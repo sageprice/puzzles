@@ -26,6 +26,7 @@ fun executeUntilCompletion(instrs: List<Instruction>): Int {
       is Jump -> {
         modifiedInstrs[i] = NoOp(ogInstr.value)
       }
+      else -> {}
     }
     val result = executeUntilLoop(modifiedInstrs)
     if (result.first) return result.second
