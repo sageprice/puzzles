@@ -10,7 +10,7 @@ fun main() {
 
 private fun findString(grid: List<String>, str: String): Long {
   var found = 0L
-  for (r in grid.indices) for (c in grid.indices) {
+  for (r in grid.indices) for (c in grid.first().indices) {
     for (dr in -1..1) for (dc in -1..1) {
       // Ya gotta go somewhere
       if (dr == 0 && dc == 0) continue
@@ -23,7 +23,7 @@ private fun findString(grid: List<String>, str: String): Long {
 private fun getDirectionalString(grid: List<String>, str: String, r: Int, c: Int, dr: Int, dc: Int): String? {
   // Make sure we stay in the grid...
   if (r + (str.length - 1) * dr !in grid.indices) return null
-  if (c + (str.length - 1) * dc !in grid.indices) return null
+  if (c + (str.length - 1) * dc !in grid.first().indices) return null
   return str.indices.map { i ->
     grid[r + dr * i][c + dc * i]
   }.joinToString("")
@@ -31,7 +31,7 @@ private fun getDirectionalString(grid: List<String>, str: String, r: Int, c: Int
 
 private fun findCrossedString(grid: List<String>, str: String): Long {
   var found = 0L
-  for (r in grid.indices) for (c in grid.indices) {
+  for (r in grid.indices) for (c in grid.first().indices) {
     if (countCrossedStrings(grid, str, r, c) == 2) found++
   }
   return found
