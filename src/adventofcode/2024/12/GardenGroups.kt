@@ -2,6 +2,7 @@ package adventofcode.`2024`.`12`
 
 import java.io.File
 
+/** https://adventofcode.com/2024/day/12 */
 fun main() {
   val input = File("src/adventofcode/2024/12/input.txt").readLines()
   val groups = getGroups(input)
