@@ -2,7 +2,9 @@ package adventofcode.`2024`.`21`
 
 import java.io.File
 
-private val cache = mutableMapOf<Pair<Char, Char>, List<String>>()
+private typealias Move = Pair<Char, Char>
+
+private val cache = mutableMapOf<Move, List<String>>()
 
 /** https://adventofcode.com/2024/day/21 */
 fun main() {
@@ -12,56 +14,82 @@ fun main() {
   getTransitions(arrowKeypad)
   for (k in cache.keys) {
     cache[k] = cache[k]!!.map { it + "A" }
-    val seqs = cache[k]!!
-    val expandedLengths = seqs.associateWith { s ->
-      getPossibleSequences(s.indices.map { i -> (s.getOrNull(i - 1) ?: 'A') to s[i] }).first()
-    }
-    val lengthOfShortest = expandedLengths.values.minBy { it.length }.length
-    cache[k] = expandedLengths.filter { it.value.length == lengthOfShortest }.keys.toList()
   }
   var score = 0L
   for (code in input) {
-    val seq = getFullSequence(code, 2)
-    score += getComplexityScore(code, seq)
+    score += code.substring(0, code.length - 1).toLong() * getShortestInputLength(code, 2)
   }
   println(score)
 
-//  score = 0L
-//  for (code in input) {
-//    val seq = getFullSequence(code, 25)
-//    score += getComplexityScore(code, seq)
-//  }
-//  println(score)
+  score = 0L
+  for (code in input) {
+    score += code.substring(0, code.length - 1).toLong() * getShortestInputLength(code, 25)
+  }
+  println(score)
 }
 
-private fun getComplexityScore(code: String, seq: String) =
-  code.substring(0, code.length - 1).toLong() * seq.length
+/// MARK: implementation
 
-private fun getFullSequence(code: String, robotRounds: Int): String {
-  val pairs = code.indices.map { i -> (code.getOrNull(i - 1) ?: 'A') to code[i] }
-  var moves = getPossibleSequences(pairs)
+private fun getShortestInputLength(code: String, robotRounds: Int): Long {
+  var moves = getShortestInputSequences(listOf(expandToMoves("A$code")))
   repeat(robotRounds) {
-    moves = getShortestMoves(moves)
+    moves = getShortestInputSequences(moves)
   }
-  return moves.first()
+  return moves.first().values.sum()
 }
 
-private fun getShortestMoves(priorSeqs: List<String>): List<String> {
-  val pairs: List<List<Pair<Char, Char>>> =
-    priorSeqs.map { seq -> seq.indices.map { i -> (seq.getOrNull(i - 1) ?: 'A') to seq[i] } }
-  val newMoves = pairs.flatMap { getPossibleSequences(it) }
-  val shortest = newMoves.minBy { it.length }
-  return newMoves.filter { it.length == shortest.length }
-}
-
-private fun getPossibleSequences(pairs: List<Pair<Char, Char>>): List<String> {
-  var possibilities = listOf<String>()
-  for (xs in pairs.map { p -> cache[p]!! }) {
-    possibilities = if (possibilities.isEmpty()) xs else possibilities.flatMap { p -> xs.map { x -> p + x } }
+private fun getShortestInputSequences(priorMoves: List<Map<Move, Long>>): List<Map<Move, Long>> {
+  val newMoves = mutableListOf<Map<Move, Long>>()
+  for (priorMove in priorMoves) {
+    val expanded = priorMove.map { (move, count) ->
+      cache[move]!!.map {
+        // Prefix with an A to handle transitions between expansions
+        expandToMoves("A$it", count = count)
+      }
+    }
+    newMoves.addAll(buildSequences(expanded))
   }
-  return possibilities
+  // The answer will only ever come from the shortest results at each step. Small performance gain.
+  val minLength = newMoves.minOfOrNull { ms -> ms.values.sum() }
+  return newMoves.filter { ms -> ms.values.sum() == minLength }
 }
 
+/**
+ * Expands the input [str] into consecutive characters, then groups and tallies those pairs.
+ *
+ * E.g. for the string >>^>>A, the pairs are [>>, >^, ^>, >>, >A], so the final output is:
+ * {
+ *   [> to >] to 2,
+ *   [> to ^] to 1,
+ *   [^ to >] to 1,
+ *   [> to A] to 1
+ * }
+ */
+private fun expandToMoves(str: String, count: Long = 1): Map<Move, Long> {
+  return (1 until str.length)
+        .map { str[it-1] to str[it] }
+        .groupBy { it }
+        .mapValues { it.value.size.toLong() * count }
+}
+
+private fun buildSequences(moveSets: List<List<Map<Move, Long>>>): List<Map<Move, Long>> {
+  if (moveSets.size <= 1) return moveSets.first().map { it.toMap().toMutableMap() }
+  val endSequences = buildSequences(moveSets.subList(1, moveSets.size))
+  return moveSets.first().flatMap { f -> combine(endSequences, f) }
+}
+
+/** Adds the moves in [toAdd] to each of the maps in [processed]. */
+private fun combine(processed: List<Map<Move, Long>>, toAdd: Map<Move, Long>): List<Map<Move, Long>> {
+  return processed.map {
+    val agg = it.toMutableMap()
+    toAdd.forEach { (m, c) ->
+      agg[m] = agg.getOrDefault(m, 0) + c
+    }
+    agg
+  }
+}
+
+/// MARK: keyboard navigation cache construction
 private fun getTransitions(keypad: List<List<Char?>>) {
   val keys = keypad.flatten().filterNotNull()
   for (key1 in keys) for (key2 in keys) {
