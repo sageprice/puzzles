@@ -5,10 +5,12 @@ import java.io.File
 /** https://adventofcode.com/2024/day/22 */
 fun main() {
   val initialSecrets = File("src/adventofcode/2024/22/input.txt").readLines().map { it.toLong() }
+
   // Part 1
   val allSecrets = initialSecrets.map { getNSecrets(it, 2000) }
   println(allSecrets.sumOf { it.last() })
 
+  // Part 2
   println(getMaxProfit(allSecrets))
 }
 
