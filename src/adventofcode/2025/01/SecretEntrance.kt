@@ -2,6 +2,7 @@ package adventofcode.`2025`.`01`
 
 import java.io.File
 
+/** https://adventofcode.com/2025/day/1 */
 fun main() {
   val rotations = File("src/adventofcode/2025/01/input.txt").readLines()
     .map { l ->
