@@ -1,6 +1,6 @@
 package puzzlehunt
 
-fun main(args: Array<String>) {
+fun main() {
 
 // PUZZLE 1
 //  val baseWords = listOf(
@@ -89,8 +89,8 @@ fun main(args: Array<String>) {
 
   // Second approach: generate all strings and check for validity incrementally.
   mastermind(6, RESTRICTED_ALPHABET, baseWords).forEach { l ->
-    if (l.length == 6 && baseWords.stream().allMatch { ws -> ws.plausiblyMatches(l.toUpperCase()) })
-      println(l.toUpperCase())
+    if (l.length == 6 && baseWords.stream().allMatch { ws -> ws.plausiblyMatches(l.uppercase()) })
+      println(l.uppercase())
   }
 }
 

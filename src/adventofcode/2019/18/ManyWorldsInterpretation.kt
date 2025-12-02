@@ -63,10 +63,8 @@ fun findShortestPath(found: String, missing: String, paths: Map<Pair<Char, Char>
         }
         val p = paths[Pair(last, c)]
         if (p == null || p.isEmpty()) null else {
-            val minD = p.filter { it.second.all { found.contains(it) } }
-                .map { it.first }
-                .minOrNull()
-            if (minD == null) null else {
+            val minD = p.filter { it.second.all { found.contains(it) } }.minOfOrNull { it.first }
+          if (minD == null) null else {
                 val rest = findShortestPath(found + c, missing.filterNot { it == c }, paths)
                 if (rest == null) null else rest + minD
             }
@@ -84,8 +82,8 @@ fun dBetween(start: Char, end: Char, requiredKeys: Set<Char>, x: Int, y: Int, vi
 
     val neededKeys = if (upper.contains(c)) {
         when {
-            c.toLowerCase() == end -> return null
-            c.toLowerCase() != start -> requiredKeys + c.toLowerCase()
+            c.lowercaseChar() == end -> return null
+            c.lowercaseChar() != start -> requiredKeys + c.lowercaseChar()
             else -> requiredKeys
         }
     } else requiredKeys
@@ -97,7 +95,7 @@ fun dBetween(start: Char, end: Char, requiredKeys: Set<Char>, x: Int, y: Int, vi
     return listOfNotNull(left, right, up, down)
         .flatten()
         .groupBy { it.second }
-        .mapValues { e -> e.value.map { it.first }.minOrNull()!! }
+        .mapValues { e -> e.value.minOf { it.first } }
         .map { Pair(it.value, it.key) }
 }
 
@@ -106,7 +104,7 @@ fun recursivelyExplore(keys: Set<Char>, x: Int, y: Int, pathLength: Int) {
     // Stop if we hit a wall.
     if (c == '#') return
     // Stop if we don't have a key, so cannot pass through.
-    if (upper.contains(c) && !keys.contains(c.toLowerCase())) return
+    if (upper.contains(c) && !keys.contains(c.lowercaseChar())) return
 
     val currentKeys = if (lower.contains(c)) {
         val withKey = keys + c

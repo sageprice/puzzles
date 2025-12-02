@@ -29,7 +29,7 @@ private fun getRoutes(
       routes.add(route + next)
     } else if (next == "start") {
       continue
-    } else if (next.toUpperCase() == next || !route.contains(next)) {
+    } else if (next.uppercase() == next || !route.contains(next)) {
       routes.addAll(getRoutes(links, next, route + next, double))
     } else if (double == null) {
       routes.addAll(getRoutes(links, next, route + next, next))
