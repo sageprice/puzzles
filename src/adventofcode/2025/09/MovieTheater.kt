@@ -16,8 +16,14 @@ import kotlin.math.min
  *   - get all rows between the points
  *   - get all edge points in those rows
  *   - if no edge points in interior, check area
- * Still runs quite slowly, maybe a minute or two. Could optimize by checking smaller of sets for
- * row-indexed or col-indexed edge points.
+ *
+ * Later update: got a nice speed-up tip from Kailing for part 2. We can re-map the row and column
+ * numbers into a smaller space so that we don't have to check as many points that might be in the
+ * interior. If there are corners on K points, we can remap the K (strictly fewer really) X coords
+ * to {0, ..., 2K}. We can't re-map to {1, ..., K} because then lines that go across the rectangle
+ * would appear to be only on the edges of it (and therefore acceptable) in the remapped space.
+ *
+ * Making that changes brings runtime from over a minute to less than a second.
  */
 fun main() {
   val input = File("src/adventofcode/2025/09/input.txt").readLines()
@@ -27,7 +33,28 @@ fun main() {
     }
 
   println(findLargestRectangle(input))
-  println(findLargestEnclosedRectangle2(input))
+
+  // Remap the row and col numbers into a smaller space so we have fewer points to check.
+  val rMap = remapIndices(input.map { it.first })
+  val cMap = remapIndices(input.map { it.second })
+  val remappedPoints = input.map { (r, c) -> rMap[r]!! to cMap[c]!! }
+  // The actual algorithm happens here.
+  val rects = findLargestEnclosedRectangle2(remappedPoints)
+  // Invert the mapping so we can do the area calculation.
+  val invertedRMap = rMap.entries.associate { (x, y) -> y to x }
+  val invertedCMap = cMap.entries.associate { (x, y) -> y to x }
+  val maxArea = rects.maxOf { (p1, p2) ->
+    val p1i = invertedRMap[p1.first]!! to invertedCMap[p1.second]!!
+    val p2i = invertedRMap[p2.first]!! to invertedCMap[p2.second]!!
+    getArea(p1i, p2i)
+  }
+  println(maxArea)
+}
+
+private fun remapIndices(points: List<Long>): Map<Long, Int> {
+  return points.distinct().sorted().mapIndexed { idx, i ->
+    i to 2*idx
+  }.associate { it }
 }
 
 private fun findLargestRectangle(points: List<Pair<Long, Long>>): Long {
@@ -43,8 +70,8 @@ private fun findLargestRectangle(points: List<Pair<Long, Long>>): Long {
   return maxArea
 }
 
-private fun walkEdges(points: List<Pair<Long, Long>>): List<Pair<Long, Long>> {
-  val edgePoints = mutableListOf<Pair<Long, Long>>()
+private fun walkEdges(points: List<Pair<Int, Int>>): List<Pair<Int, Int>> {
+  val edgePoints = mutableListOf<Pair<Int, Int>>()
   for (i in points.indices) {
     val (r1, c1) = points[i]
     val (r2, c2) = if (i+1 == points.size) {
@@ -63,8 +90,8 @@ private fun walkEdges(points: List<Pair<Long, Long>>): List<Pair<Long, Long>> {
   return edgePoints
 }
 
-private fun getPointsInRows(ps: List<Pair<Long, Long>>): Map<Long, Set<Pair<Long, Long>>> {
-  val pointsInRows = mutableMapOf<Long, MutableSet<Pair<Long, Long>>>()
+private fun getPointsInRows(ps: List<Pair<Int, Int>>): Map<Int, Set<Pair<Int, Int>>> {
+  val pointsInRows = mutableMapOf<Int, MutableSet<Pair<Int, Int>>>()
   for (p in ps) {
     if (p.first !in pointsInRows) {
       pointsInRows[p.first] = mutableSetOf()
@@ -74,19 +101,8 @@ private fun getPointsInRows(ps: List<Pair<Long, Long>>): Map<Long, Set<Pair<Long
   return pointsInRows
 }
 
-private fun getPointsInCols(ps: List<Pair<Long, Long>>): Map<Long, Set<Pair<Long, Long>>> {
-  val pointsInCols = mutableMapOf<Long, MutableSet<Pair<Long, Long>>>()
-  for (p in ps) {
-    if (p.second !in pointsInCols) {
-      pointsInCols[p.second] = mutableSetOf()
-    }
-    pointsInCols[p.second]?.add(p)
-  }
-  return pointsInCols
-}
-
-private fun findLargestEnclosedRectangle2(points: List<Pair<Long, Long>>): Long {
-  var maxArea = 0L
+private fun findLargestEnclosedRectangle2(points: List<Pair<Int, Int>>): List<Pair<Pair<Int, Int>, Pair<Int, Int>>> {
+  val rects = mutableListOf<Pair<Pair<Int, Int>, Pair<Int, Int>>>()
   val edgePoints = walkEdges(points)
   val pointsInRows = getPointsInRows(edgePoints)
   for (i in points.indices) {
@@ -104,12 +120,10 @@ private fun findLargestEnclosedRectangle2(points: List<Pair<Long, Long>>): Long 
           }
         }
       }
-      val area = getArea(a, b)
-//      println("Rectangle $a, $b has no interior points, area of $area")
-      if (area > maxArea) maxArea = area
+      rects.add(Pair(a, b))
     }
   }
-  return maxArea
+  return rects
 }
 
 private fun getArea(p1: Pair<Long, Long>, p2: Pair<Long, Long>): Long {
